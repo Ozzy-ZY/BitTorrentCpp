@@ -17,6 +17,7 @@ std::string encode_int(const json& val);
 std::string encode_string(const json& val);
 std::string encode_list(const json& val);
 std::string encode_dict(const json& val);
+
 std::string encode_int(const json& val){
     std::stringstream str_strm;
     str_strm << 'i' << val.get<i64>() << 'e';
@@ -26,6 +27,8 @@ std::string encode_string(const json& val){
     std::stringstream str_strm;
     std::string str = val.get<std::string>();
     str_strm << str.length() <<':'<<str;
+    return str_strm.str();
+
 }
 std::string encode_list(const json& val){
     std::stringstream str_strm;
@@ -42,6 +45,7 @@ std::string encode_dict(const json& val){
     for(const auto& item:val.items()){
         str_strm << encode_string(item.key()) << encode_content(item.value());
     }
+    return str_strm.str();
 }
 std::string encode_content(const json& val){
     if(val.is_string()){
@@ -57,7 +61,7 @@ std::string encode_content(const json& val){
         return encode_dict(val);
     }
     else{
-        std::cout<<"invalid";
-        throw std::runtime_error("invalid data"+val);
+        std::cout<<"invalidsssss";
+        throw std::runtime_error("invalid data");
     }
 }

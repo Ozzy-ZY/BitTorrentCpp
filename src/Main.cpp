@@ -1,6 +1,7 @@
 #include"lib/sha1.hpp"
 #include "lib/nlohmann/json.hpp"
 #include"decode_bencode.hpp"
+#include"encode_bencode.hpp"
 
 std::string calculate_hash(const std::string& text);
 
@@ -37,8 +38,12 @@ int main(int argc, char* argv[]) {
         std::string tracker_url;
         decoded_data["announce"].get_to(tracker_url);
         i64 len = decoded_data["info"]["length"];
+
+        std::string infoBencoded = encode_content(decoded_data["info"]["pieces"]);
+        std::string infoHash = calculate_hash(infoBencoded);
+
         std::cout << "Tracker URL: " << tracker_url << std::endl<<
-        "Length: "<<len<<std::endl;
+        "Length: "<<len<<std::endl<<"hash: "<<infoHash<<std::endl;
     }     
     else {
         std::cerr << "unknown command: " << command << std::endl;

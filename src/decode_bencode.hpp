@@ -87,7 +87,10 @@ json parse_torrent_file(const std::string& filename){
     if(file){
         std::stringstream str_stream;
         str_stream << file.rdbuf();
+        file.close();
         return decode_bencoded(str_stream.str());
     }
     file.close();
+    printf("error with file");
+    throw std::runtime_error("file err");
 }
