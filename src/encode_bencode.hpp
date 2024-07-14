@@ -1,67 +1,79 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <cctype>
 #include <cstdlib>
-#include<fstream>
+#include <fstream>
 #include <sstream>
 #include <map>
-
-#include"lib/sha1.hpp"
+#include "lib/sha1.hpp"
 #include "lib/nlohmann/json.hpp"
+
 using json = nlohmann::json;
-typedef long long i64;
-std::string encode_content(const json& val);
+using i64 = long long;
+
 std::string encode_int(const json& val);
 std::string encode_string(const json& val);
 std::string encode_list(const json& val);
 std::string encode_dict(const json& val);
+std::string encode_content(const json& val);
 
-std::string encode_int(const json& val){
+std::string encode_int(const json& val) {
+    if (!val.is_number_integer()) {
+        throw std::invalid_argument("Expected integer value");
+    }
     std::stringstream str_strm;
     str_strm << 'i' << val.get<i64>() << 'e';
     return str_strm.str();
 }
-std::string encode_string(const json& val){
-    std::stringstream str_strm;
-    std::string str = val.get<std::string>();
-    str_strm << str.length() <<':'<<str;
-    return str_strm.str();
 
-}
-std::string encode_list(const json& val){
+std::string encode_string(const json& val) {
+    if (!val.is_string()) {
+        throw std::invalid_argument("Expected string value");
+    }
+    std::string str = val.get<std::string>();
     std::stringstream str_strm;
-    str_strm <<'l';
-    for(const auto item:val){
+    str_strm << str.length() << ':' << str;
+    return str_strm.str();
+}
+
+std::string encode_list(const json& val) {
+    if (!val.is_array()) {
+        throw std::invalid_argument("Expected array value");
+    }
+    std::stringstream str_strm;
+    str_strm << 'l';
+    for (const auto& item : val) {
         str_strm << encode_content(item);
     }
     str_strm << 'e';
     return str_strm.str();
 }
-std::string encode_dict(const json& val){
+
+std::string encode_dict(const json& val) {
+    if (!val.is_object()) {
+        throw std::invalid_argument("Expected object value");
+    }
     std::stringstream str_strm;
-    str_strm <<'d';
-    for(const auto& item:val.items()){
-        str_strm << encode_string(item.key()) << encode_content(item.value());
+    str_strm << 'd';
+    for (auto it = val.begin(); it != val.end(); ++it) {
+        str_strm << encode_string(it.key()) << encode_content(it.value());
     }
     return str_strm.str();
 }
-std::string encode_content(const json& val){
-    if(val.is_string()){
+
+std::string encode_content(const json& val) {
+    if (val.is_string()) {
         return encode_string(val);
-    }
-    else if(val.is_number_integer()){
+    } else if (val.is_number_integer()) {
         return encode_int(val);
-    }
-    else if(val.is_array()){
+    } else if (val.is_array()) {
         return encode_list(val);
-    }
-    else if(val.is_object()){
+    } else if (val.is_object()) {
         return encode_dict(val);
-    }
-    else{
-        std::cout<<"invalidsssss";
-        throw std::runtime_error("invalid data");
+    } else {
+        throw std::invalid_argument("Unsupported data type for encoding");
     }
 }
